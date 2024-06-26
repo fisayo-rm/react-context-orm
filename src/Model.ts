@@ -1,34 +1,113 @@
-interface Fields {
-  [key: string]: any;
+interface Attribute {
+  value: any;
+  make(value: any): any;
 }
+
+interface Fields {
+  [key: string]: Attribute;
+}
+
+interface FieldCache {
+  [key: string]: Fields;
+}
+
+interface Record {
+  [field: string]: any;
+}
+
 export class Model {
+  [key: string]: any;
   static entity: string;
-  static fields: () => Fields;
-  private data: Fields;
 
-  constructor(attributes: Fields = {}) {
-    this.data = { ...this.constructor.fields(), ...attributes };
+  static cachedFields: FieldCache;
+
+  $id: string | null = null;
+
+  constructor(record?: Record) {
+    this.$fill(record);
   }
 
-  static create(attributes: Fields = {}): Model {
-    return new this(attributes);
+  static fields(): Fields {
+    return {};
   }
 
-  static all(): Model[] {
-    // Placeholder for fetching all instances
-    return [];
+  static attr(defaultValue: any): Attribute {
+    const value = defaultValue;
+    return {
+      value,
+      make(value: any): any {
+        let localValue = value !== undefined ? value : defaultValue;
+        if (typeof value === 'function') {
+          localValue = value();
+        }
+        return localValue;
+      },
+    };
   }
 
-  static find(id: string): Model | null {
-    // Placeholder for fetching a single instance by ID
-    return null;
+  static getFields(): Fields {
+    this.cachedFields ??= {};
+    this.cachedFields[this.entity] ??= this.fields();
+
+    return this.cachedFields[this.entity];
   }
 
-  save(): void {
-    // Placeholder for saving the instance
+  $self(): typeof Model {
+    return this.constructor as typeof Model;
   }
 
-  delete(): void {
-    // Placeholder for deleting the instance
+  $fields(): Fields {
+    return this.$self().getFields();
+  }
+
+  $fill(record: Record = {}): void {
+    const fields = this.$fields();
+
+    for (const key in fields) {
+      const field = fields[key];
+      const value = record[key];
+
+      this[key] = field.make(value);
+    }
+
+    record.$id !== undefined && this.$setIndex(record.$id);
+  }
+
+  $setIndex(id: string | null): this {
+    this.$id = id;
+
+    return this;
+  }
+
+  static dispatch(action: string, payload: any): any {
+    return { action, payload };
+  }
+
+  static create<T extends typeof Model>(this: T, payload: any): any {
+    return this.dispatch('create', payload);
+  }
+
+  static insert<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the insert logic
+  }
+
+  static update<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the update logic
+  }
+
+  static insertOrUpdate<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the insertOrUpdate logic
+  }
+
+  static delete<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the delete logic
+  }
+
+  static deleteAll<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the deleteAll logic
+  }
+
+  static all<T extends typeof Model>(this: T, payload: any): any {
+    // Placeholder for the all logic
   }
 }

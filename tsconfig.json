@@ -8,7 +8,24 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+
+    "suppressImplicitAnyIndexErrors": true,
+    "ignoreDeprecations": "5.0"
+    // "allowJs": false,
+    // "checkJs": false,
+    // "declaration": false,
+    // "sourceMap": false,
+    // "downlevelIteration": false,
+    // "experimentalDecorators": false,
+    // "noImplicitAny": false,
+    // "noImplicitThis": false,
+    // "noUnusedLocals": false,
+    // "noUnusedParameters": false,
+    // "noEmit": false,
+    // "noEmitOnError": false,
+    // "importHelpers": false,
+    // "isolatedModules": false
   },
   "include": ["src/**/*", "tests/**/*"]
 }
