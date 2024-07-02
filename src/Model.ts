@@ -1,3 +1,5 @@
+import { State } from './ModelContext';
+
 interface Attribute {
   value: any;
   make(value: any): any;
@@ -22,6 +24,18 @@ export class Model {
   static cachedFields: FieldCache;
 
   $id: string | null = null;
+
+  static dispatch: (type: string, payload?: any) => Promise<any>;
+
+  static store: State;
+
+  static init(
+    state: State,
+    dispatch: (type: string, payload?: any) => Promise<any>,
+  ) {
+    this.dispatch = dispatch;
+    this.store = state;
+  }
 
   constructor(record?: Record) {
     this.$fill(record);
@@ -79,11 +93,8 @@ export class Model {
     return this;
   }
 
-  static dispatch(action: string, payload: any): any {
-    return { action, payload };
-  }
-
   static create<T extends typeof Model>(this: T, payload: any): any {
+    payload.model = this;
     return this.dispatch('create', payload);
   }
 
