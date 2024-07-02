@@ -99,7 +99,8 @@ export class Model {
   }
 
   static insert<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the insert logic
+    payload.model = this;
+    return this.dispatch('insert', payload);
   }
 
   static update<T extends typeof Model>(this: T, payload: any): any {

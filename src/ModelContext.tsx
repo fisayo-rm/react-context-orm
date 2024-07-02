@@ -80,8 +80,14 @@ function createRecords(normalizedData: NormalizedData, model: typeof Model) {
 
 const mutations: Record<string, Mutation> = {
   create: (state, payload) => {
-    const { entity, ...restPayload } = payload;
-    state[entity] = restPayload[entity];
+    const { entity, data } = payload;
+    state[entity] = data[entity];
+  },
+  insert: (state, payload) => {
+    const { entity, data } = payload;
+    state[entity] = state[entity]
+      ? [...state[entity], ...data[entity]]
+      : data[entity];
   },
 };
 
@@ -89,10 +95,16 @@ const actions: Record<string, ActionCreator> = {
   create: async ({ commit }, payload) => {
     const { model, ...restPayload } = payload;
     const normalizedData = normalizeData(model.entity, restPayload.data);
-    const createdRecords = createRecords(normalizedData, model);
-    createdRecords.entity = model.entity;
-    commit('create', createdRecords);
-    return createdRecords;
+    const records = createRecords(normalizedData, model);
+    commit('create', { data: records, entity: model.entity });
+    return records;
+  },
+  insert: async ({ commit }, payload) => {
+    const { model, ...restPayload } = payload;
+    const normalizedData = normalizeData(model.entity, restPayload.data);
+    const records = createRecords(normalizedData, model);
+    commit('insert', { data: records, entity: model.entity });
+    return records;
   },
 };
 
