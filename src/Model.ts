@@ -104,7 +104,8 @@ export class Model {
   }
 
   static update<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the update logic
+    payload.model = this;
+    return this.dispatch('update', payload);
   }
 
   static insertOrUpdate<T extends typeof Model>(this: T, payload: any): any {

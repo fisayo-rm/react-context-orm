@@ -89,6 +89,12 @@ const mutations: Record<string, Mutation> = {
       ? [...state[entity], ...data[entity]]
       : data[entity];
   },
+  update: (state, payload) => {
+    const { entity, data } = payload;
+    state[entity] = state[entity].map((item: any) =>
+      item.id === data[entity][0].id ? data[entity][0] : item,
+    );
+  },
 };
 
 const actions: Record<string, ActionCreator> = {
@@ -105,6 +111,12 @@ const actions: Record<string, ActionCreator> = {
     const records = createRecords(normalizedData, model);
     commit('insert', { data: records, entity: model.entity });
     return records;
+  },
+  update: async ({ commit }, payload) => {
+    const { model, ...restPayload } = payload;
+    const normalizedData = normalizeData(model.entity, restPayload.data);
+    const records = createRecords(normalizedData, model);
+    commit('update', { data: records, entity: model.entity });
   },
 };
 
