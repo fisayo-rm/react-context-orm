@@ -128,8 +128,9 @@ export class Model {
     return this.dispatch('delete', payload);
   }
 
-  static deleteAll<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the deleteAll logic
+  static deleteAll<T extends typeof Model>(this: T): Promise<void> {
+    const payload = { model: this };
+    return this.dispatch('deleteAll', payload);
   }
 
   static all<T extends typeof Model>(this: T, payload: any): any {

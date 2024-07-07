@@ -123,6 +123,10 @@ const mutations: Record<string, Mutation> = {
       state[entity] = state[entity].filter((item: Model) => item.id !== arg);
     }
   },
+  deleteAll: (state, payload) => {
+    const { entity } = payload;
+    state[entity] = [];
+  },
 };
 
 const actions: Record<string, ActionCreator> = {
@@ -169,6 +173,10 @@ const actions: Record<string, ActionCreator> = {
     }
     commit('delete', { entity: model.entity, arg });
     return deletedItems;
+  },
+  deleteAll: async ({ commit }, payload) => {
+    const { model } = payload;
+    commit('deleteAll', { entity: model.entity });
   },
 };
 
