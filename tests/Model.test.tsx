@@ -1,7 +1,7 @@
 import { render, waitFor, act } from '@testing-library/react';
 import { Model } from '../src/Model';
 import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 class TestModel extends Model {
   static entity = 'test';
@@ -16,7 +16,23 @@ class TestModel extends Model {
   }
 }
 
-type methodType = 'create' | 'insert' | 'update' | 'insertOrUpdate' | 'delete';
+type methodType =
+  | 'create'
+  | 'insert'
+  | 'update'
+  | 'insertOrUpdate'
+  | 'delete'
+  | 'deleteAll';
+
+function UpdateState({ children }: { children: React.ReactNode }) {
+  const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    setKey((prevKey) => prevKey + 1);
+  }, []);
+
+  return <div key={key}>{children}</div>;
+}
 
 const TestComponent = ({
   payload,
@@ -30,9 +46,11 @@ const TestComponent = ({
 
   useEffect(() => {
     TestModel.init(state, dispatch);
+    // TestModel.init(dispatch);
     const executeMethod = async () => {
       // await TestModel.init(state, dispatch);
       await TestModel[method](payload);
+      await new Promise((resolve) => setTimeout(resolve, 0));
     };
     executeMethod();
   }, [method, payload]);
@@ -47,6 +65,10 @@ const TestComponent = ({
     </div>
   );
 };
+
+beforeEach(() => {
+  Model.store = {};
+});
 
 test('Model should be defined', () => {
   expect(Model).toBeDefined();
@@ -192,16 +214,27 @@ test('Model should insertOrUpdate records and update state', async () => {
     ],
   };
 
-  render(
+  const { rerender } = render(
     <StoreProvider>
       <TestComponent payload={createPayload} method="create" />
+    </StoreProvider>,
+  );
+
+  rerender(
+    <StoreProvider>
       <TestComponent payload={insertOrUpdatePayload1} method="insertOrUpdate" />
+    </StoreProvider>,
+  );
+
+  rerender(
+    <StoreProvider>
       <TestComponent payload={insertOrUpdatePayload2} method="insertOrUpdate" />
     </StoreProvider>,
   );
 
   await waitFor(() => {
     const state = Model.store;
+    // console.log('Store:', state);
     expect(state.test.length).toBe(3);
     expect(state.test.find((item: Model) => item.id === 1).name).toBe(
       'updatedTest1',
@@ -218,16 +251,28 @@ test('Model should delete a record by id and update state', async () => {
   const createPayload = { data: { id: 1, name: 'test1' } };
   const deletePayload = 1;
 
-  const { getByTestId } = render(
+  const { rerender } = render(
     <StoreProvider>
       <TestComponent payload={createPayload} method="create" />
+    </StoreProvider>,
+  );
+  rerender(
+    <StoreProvider>
       <TestComponent payload={deletePayload} method="delete" />
     </StoreProvider>,
   );
 
+  // await act(async () => {
+  //   const deletedItems = await TestModel.delete(deletePayload);
+  //   expect(deletedItems.length).toBe(1);
+  //   expect(deletedItems[0].id).toBe(1);
+  //   // expect(deletedItems[1].id).toBe(2);
+  // });
+
   await waitFor(() => {
     const state = Model.store;
     // const state = JSON.parse(getByTestId('state').textContent || '{}');
+    // console.log('Store:', state);
     const instance = state.test.find((item: Model) => item.id === 1);
     expect(instance).toBeUndefined();
   });
@@ -255,6 +300,71 @@ test('Model should delete multiple records by ids and update state', async () =>
     expect(deletedItems[0].id).toBe(1);
     expect(deletedItems[1].id).toBe(2);
   });
+
+  await waitFor(() => {
+    const state = Model.store;
+    expect(state.test.length).toBe(0);
+  });
+});
+
+test('Model should delete records by predicate and update state', async () => {
+  const createPayload = {
+    data: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+      { id: 3, name: 'other' },
+    ],
+  };
+  const deletePredicate = (item: Model) => item.name.startsWith('test');
+
+  const { rerender } = render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method="create" />
+      {/* <TestComponent payload={deletePredicate} method="delete" /> */}
+    </StoreProvider>,
+  );
+
+  rerender(
+    <StoreProvider>
+      {/* <TestComponent payload={createPayload} method="create" /> */}
+      <TestComponent payload={deletePredicate} method="delete" />
+    </StoreProvider>,
+  );
+
+  await waitFor(() => {
+    const state = Model.store;
+    // console.log('Store:', state);
+    expect(state.test.length).toBe(1);
+    expect(state.test[0].name).toBe('other');
+  });
+
+  // await act(async () => {
+  //   const deletedItems = await TestModel.delete(deletePredicate);
+  //   expect(deletedItems.length).toBe(2);
+  //   expect(deletedItems[0].id).toBe(1);
+  //   expect(deletedItems[1].id).toBe(2);
+  // })
+});
+
+test('Model should delete all records and update state', async () => {
+  const createPayload = {
+    data: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+    ],
+  };
+
+  const { rerender } = render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method="create" />
+    </StoreProvider>,
+  );
+
+  rerender(
+    <StoreProvider>
+      <TestComponent payload={{}} method="deleteAll" />
+    </StoreProvider>,
+  );
 
   await waitFor(() => {
     const state = Model.store;
