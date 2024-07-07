@@ -95,6 +95,34 @@ const mutations: Record<string, Mutation> = {
       item.id === data[entity][0].id ? data[entity][0] : item,
     );
   },
+  insertOrUpdate: (state, payload) => {
+    const { entity, data } = payload;
+    state[entity] = state[entity] ? [...state[entity]] : [];
+
+    data[entity].forEach((newItem: any) => {
+      const index = state[entity].findIndex(
+        (item: any) => item.id === newItem.id,
+      );
+      if (index !== -1) {
+        state[entity][index] = newItem;
+      } else {
+        state[entity].push(newItem);
+      }
+    });
+  },
+  delete: (state, payload) => {
+    const { entity, arg } = payload;
+
+    if (typeof arg === 'function') {
+      state[entity] = state[entity].filter((item: Model) => !arg(item));
+    } else if (Array.isArray(arg)) {
+      state[entity] = state[entity].filter(
+        (item: Model) => !arg.includes(item.id),
+      );
+    } else {
+      state[entity] = state[entity].filter((item: Model) => item.id !== arg);
+    }
+  },
 };
 
 const actions: Record<string, ActionCreator> = {
@@ -117,6 +145,30 @@ const actions: Record<string, ActionCreator> = {
     const normalizedData = normalizeData(model.entity, restPayload.data);
     const records = createRecords(normalizedData, model);
     commit('update', { data: records, entity: model.entity });
+  },
+  insertOrUpdate: async ({ commit }, payload) => {
+    const { model, ...restPayload } = payload;
+    const normalizedData = normalizeData(model.entity, restPayload.data);
+    const records = createRecords(normalizedData, model);
+    commit('insertOrUpdate', { data: records, entity: model.entity });
+  },
+  delete: async ({ commit, state }, payload) => {
+    const { model, arg } = payload;
+    let deletedItems: any = [];
+
+    if (typeof arg === 'function') {
+      deletedItems = state[model.entity].filter((item: Model) => arg(item));
+    } else if (Array.isArray(arg)) {
+      deletedItems = state[model.entity].filter((item: Model) =>
+        arg.includes(item.id),
+      );
+    } else {
+      deletedItems = state[model.entity].filter(
+        (item: Model) => item.id === arg,
+      );
+    }
+    commit('delete', { entity: model.entity, arg });
+    return deletedItems;
   },
 };
 
@@ -141,9 +193,13 @@ export const StoreProvider: React.FC<{
     const action = actions[type];
     if (action) {
       const context: ActionContext = {
-        state,
+        state: Model.store,
+        // state,
         commit: (mutationType: string, mutationPayload?: any) => {
-          reactDispatch({ type: mutationType, payload: mutationPayload });
+          reactDispatch({
+            type: mutationType,
+            payload: mutationPayload,
+          });
         },
         dispatch: (actionType: string, actionPayload?: any) =>
           dispatch(actionType, actionPayload),

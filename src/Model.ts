@@ -17,6 +17,8 @@ interface Record {
   [field: string]: any;
 }
 
+type Predicate<T> = (item: T) => boolean;
+
 export class Model {
   [key: string]: any;
   static entity: string;
@@ -109,11 +111,21 @@ export class Model {
   }
 
   static insertOrUpdate<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the insertOrUpdate logic
+    payload.model = this;
+    return this.dispatch('insertOrUpdate', payload);
   }
 
-  static delete<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the delete logic
+  static delete<T extends typeof Model>(
+    this: T,
+    id: string | number | (number | string)[],
+  ): any[];
+  static delete<T extends typeof Model>(
+    this: T,
+    predicate: Predicate<InstanceType<T>>,
+  ): any[];
+  static delete<T extends typeof Model>(this: T, arg: any): any {
+    const payload = { arg, model: this };
+    return this.dispatch('delete', payload);
   }
 
   static deleteAll<T extends typeof Model>(this: T, payload: any): any {
