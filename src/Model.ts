@@ -133,7 +133,7 @@ export class Model {
     return this.dispatch('deleteAll', payload);
   }
 
-  static all<T extends typeof Model>(this: T, payload: any): any {
-    // Placeholder for the all logic
+  static all<T extends typeof Model>(this: T): InstanceType<T>[] {
+    return Model.store[this.entity] || []
   }
 }

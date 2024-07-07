@@ -372,6 +372,30 @@ test('Model should delete all records and update state', async () => {
   });
 });
 
+test('Model should retrieve all records', async () => {
+  const createPayload = {
+    data: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+    ],
+  };
+
+  render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method='create' />
+    </StoreProvider>
+  );
+
+  await waitFor(() => {
+    const allRecords = TestModel.all()
+    expect(allRecords.length).toBe(2)
+    expect(allRecords[0].id).toBe(1)
+    expect(allRecords[0].name).toBe('test1')
+    expect(allRecords[1].id).toBe(2)
+    expect(allRecords[1].name).toBe('test2')
+  })
+})
+
 // Alternative Approach
 
 // class TestModel extends Model {
