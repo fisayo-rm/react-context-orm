@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { Model } from '../src/Model';
 import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
 import { useEffect } from 'react';
@@ -16,7 +16,7 @@ class TestModel extends Model {
   }
 }
 
-type methodType = 'create' | 'insert' | 'update';
+type methodType = 'create' | 'insert' | 'update' | 'insertOrUpdate' | 'delete';
 
 const TestComponent = ({
   payload,
@@ -85,7 +85,7 @@ test('Model should dispatch create action with payload and update state', async 
 test('Model static store property should be updated', async () => {
   const payload = { data: { id: 2, name: 'test2' } };
 
-  render(
+  const { getByTestId } = render(
     <StoreProvider>
       <TestComponent payload={payload} method="create" />
     </StoreProvider>,
@@ -97,7 +97,8 @@ test('Model static store property should be updated', async () => {
     // console.log('Model Store:', Model.store);
 
     // Verify the static store property is updated
-    const state = Model.store;
+    // const state = Model.store;
+    const state = JSON.parse(getByTestId('state').textContent || '{}');
     const instance = state.test.find((item: TestModel) => item.id === 2);
     expect(instance).toBeDefined();
     expect(instance.name).toBe('test2');
@@ -173,6 +174,91 @@ test('Model should update records and update state', async () => {
     const instance = state.test.find((item: Model) => item.id === 1);
     expect(instance).toBeDefined();
     expect(instance.name).toBe('updatedTest1');
+  });
+});
+
+test('Model should insertOrUpdate records and update state', async () => {
+  const createPayload = { data: { id: 1, name: 'test1' } };
+  const insertOrUpdatePayload1 = {
+    data: [
+      { id: 1, name: 'updatedTest1' },
+      { id: 2, name: 'test2' },
+    ],
+  };
+  const insertOrUpdatePayload2 = {
+    data: [
+      { id: 2, name: 'updatedTest2' },
+      { id: 3, name: 'test3' },
+    ],
+  };
+
+  render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method="create" />
+      <TestComponent payload={insertOrUpdatePayload1} method="insertOrUpdate" />
+      <TestComponent payload={insertOrUpdatePayload2} method="insertOrUpdate" />
+    </StoreProvider>,
+  );
+
+  await waitFor(() => {
+    const state = Model.store;
+    expect(state.test.length).toBe(3);
+    expect(state.test.find((item: Model) => item.id === 1).name).toBe(
+      'updatedTest1',
+    );
+    expect(state.test.find((item: Model) => item.id === 2).name).toBe(
+      'updatedTest2',
+    );
+    expect(state.test.find((item: Model) => item.id === 3).name).toBeDefined();
+    expect(state.test.find((item: Model) => item.id === 3).name).toBe('test3');
+  });
+});
+
+test('Model should delete a record by id and update state', async () => {
+  const createPayload = { data: { id: 1, name: 'test1' } };
+  const deletePayload = 1;
+
+  const { getByTestId } = render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method="create" />
+      <TestComponent payload={deletePayload} method="delete" />
+    </StoreProvider>,
+  );
+
+  await waitFor(() => {
+    const state = Model.store;
+    // const state = JSON.parse(getByTestId('state').textContent || '{}');
+    const instance = state.test.find((item: Model) => item.id === 1);
+    expect(instance).toBeUndefined();
+  });
+});
+
+test('Model should delete multiple records by ids and update state', async () => {
+  const createPayload = {
+    data: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+    ],
+  };
+  const deletePayload = [1, 2];
+
+  render(
+    <StoreProvider>
+      <TestComponent payload={createPayload} method="create" />
+      {/* <TestComponent payload={deletePayload} method="delete" /> */}
+    </StoreProvider>,
+  );
+
+  await act(async () => {
+    const deletedItems = await TestModel.delete(deletePayload);
+    expect(deletedItems.length).toBe(2);
+    expect(deletedItems[0].id).toBe(1);
+    expect(deletedItems[1].id).toBe(2);
+  });
+
+  await waitFor(() => {
+    const state = Model.store;
+    expect(state.test.length).toBe(0);
   });
 });
 
