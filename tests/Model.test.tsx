@@ -16,6 +16,45 @@ class TestModel extends Model {
   }
 }
 
+class User extends Model {
+  static entity = 'users';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      name: this.attr(''),
+      posts: this.hasMany(Post, 'userId'),
+    };
+  }
+}
+
+class Post extends Model {
+  static entity = 'posts';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      title: this.attr(''),
+      userId: this.attr(null),
+      user: this.belongsTo(User, 'userId'),
+      comments: this.hasMany(Comment, 'postId'),
+    };
+  }
+}
+
+class Comment extends Model {
+  static entity = 'comments';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      content: this.attr(''),
+      postId: this.attr(null),
+      post: this.belongsTo(Post, 'postId'),
+    };
+  }
+}
+
 type methodType =
   | 'create'
   | 'insert'
@@ -24,36 +63,28 @@ type methodType =
   | 'delete'
   | 'deleteAll';
 
-function UpdateState({ children }: { children: React.ReactNode }) {
-  const [key, setKey] = useState(0);
-
-  useEffect(() => {
-    setKey((prevKey) => prevKey + 1);
-  }, []);
-
-  return <div key={key}>{children}</div>;
-}
-
 const TestComponent = ({
   payload,
   method,
+  modelClass,
 }: {
   payload: any;
   method: methodType;
+  modelClass: typeof Model;
 }) => {
   const state = useStoreState();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    TestModel.init(state, dispatch);
+    modelClass.init(state, dispatch);
     // TestModel.init(dispatch);
     const executeMethod = async () => {
       // await TestModel.init(state, dispatch);
-      await TestModel[method](payload);
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await modelClass[method](payload);
+      // await new Promise((resolve) => setTimeout(resolve, 0));
     };
     executeMethod();
-  }, [method, payload]);
+  }, [method, payload, modelClass]);
 
   // useEffect(() => {
   //   TestModel.store = state;
@@ -61,7 +92,12 @@ const TestComponent = ({
 
   return (
     <div>
-      <div data-testid="state">{JSON.stringify(state)}</div>
+      {/* NOTE: using toObject for serialization to prevent circular references*/}
+      <div data-testid="state">
+        {JSON.stringify(state, (key, value) =>
+          value instanceof Model ? value.toObject() : value,
+        )}
+      </div>
     </div>
   );
 };
@@ -91,7 +127,7 @@ test('Model should dispatch create action with payload and update state', async 
 
   const { getByTestId } = render(
     <StoreProvider>
-      <TestComponent payload={payload} method="create" />
+      <TestComponent modelClass={TestModel} payload={payload} method="create" />
     </StoreProvider>,
   );
 
@@ -109,7 +145,7 @@ test('Model static store property should be updated', async () => {
 
   const { getByTestId } = render(
     <StoreProvider>
-      <TestComponent payload={payload} method="create" />
+      <TestComponent modelClass={TestModel} payload={payload} method="create" />
     </StoreProvider>,
   );
 
@@ -137,7 +173,7 @@ test('Model should insert records and update state', async () => {
 
   render(
     <StoreProvider>
-      <TestComponent payload={payload} method="insert" />
+      <TestComponent modelClass={TestModel} payload={payload} method="insert" />
     </StoreProvider>,
   );
 
@@ -160,8 +196,16 @@ test('Model should create and insert records and update state', async () => {
 
   render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
-      <TestComponent payload={insertPayload} method="insert" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
+      <TestComponent
+        modelClass={TestModel}
+        payload={insertPayload}
+        method="insert"
+      />
     </StoreProvider>,
   );
 
@@ -172,11 +216,6 @@ test('Model should create and insert records and update state', async () => {
     expect(state.test.find((item: Model) => item.id === 1)).toBeDefined();
     expect(state.test.find((item: Model) => item.id === 2)).toBeDefined();
     expect(state.test.find((item: Model) => item.id === 3)).toBeDefined();
-
-    // expect(state.test.length).toBe(1);
-    // expect(state.test.find((item: Model) => item.id === 1)).toBeDefined();
-    // expect(state.test.find((item: Model) => item.id === 2)).toBeUndefined();
-    // expect(state.test.find((item: Model) => item.id === 3)).toBeUndefined();
   });
 });
 
@@ -186,8 +225,16 @@ test('Model should update records and update state', async () => {
 
   render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
-      <TestComponent payload={updatePayload} method="update" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
+      <TestComponent
+        modelClass={TestModel}
+        payload={updatePayload}
+        method="update"
+      />
     </StoreProvider>,
   );
 
@@ -216,25 +263,36 @@ test('Model should insertOrUpdate records and update state', async () => {
 
   const { rerender } = render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
     </StoreProvider>,
   );
 
   rerender(
     <StoreProvider>
-      <TestComponent payload={insertOrUpdatePayload1} method="insertOrUpdate" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={insertOrUpdatePayload1}
+        method="insertOrUpdate"
+      />
     </StoreProvider>,
   );
 
   rerender(
     <StoreProvider>
-      <TestComponent payload={insertOrUpdatePayload2} method="insertOrUpdate" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={insertOrUpdatePayload2}
+        method="insertOrUpdate"
+      />
     </StoreProvider>,
   );
 
   await waitFor(() => {
     const state = Model.store;
-    // console.log('Store:', state);
     expect(state.test.length).toBe(3);
     expect(state.test.find((item: Model) => item.id === 1).name).toBe(
       'updatedTest1',
@@ -253,12 +311,20 @@ test('Model should delete a record by id and update state', async () => {
 
   const { rerender } = render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
     </StoreProvider>,
   );
   rerender(
     <StoreProvider>
-      <TestComponent payload={deletePayload} method="delete" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={deletePayload}
+        method="delete"
+      />
     </StoreProvider>,
   );
 
@@ -289,8 +355,12 @@ test('Model should delete multiple records by ids and update state', async () =>
 
   render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
-      {/* <TestComponent payload={deletePayload} method="delete" /> */}
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
+      {/* <TestComponent modelClass={TestModel} payload={deletePayload} method="delete" /> */}
     </StoreProvider>,
   );
 
@@ -319,15 +389,23 @@ test('Model should delete records by predicate and update state', async () => {
 
   const { rerender } = render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
-      {/* <TestComponent payload={deletePredicate} method="delete" /> */}
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
+      {/* <TestComponent modelClass={TestModel} payload={deletePredicate} method="delete" /> */}
     </StoreProvider>,
   );
 
   rerender(
     <StoreProvider>
-      {/* <TestComponent payload={createPayload} method="create" /> */}
-      <TestComponent payload={deletePredicate} method="delete" />
+      {/* <TestComponent modelClass={TestModel} payload={createPayload} method="create" /> */}
+      <TestComponent
+        modelClass={TestModel}
+        payload={deletePredicate}
+        method="delete"
+      />
     </StoreProvider>,
   );
 
@@ -356,13 +434,17 @@ test('Model should delete all records and update state', async () => {
 
   const { rerender } = render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method="create" />
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
     </StoreProvider>,
   );
 
   rerender(
     <StoreProvider>
-      <TestComponent payload={{}} method="deleteAll" />
+      <TestComponent modelClass={TestModel} payload={{}} method="deleteAll" />
     </StoreProvider>,
   );
 
@@ -382,192 +464,78 @@ test('Model should retrieve all records', async () => {
 
   render(
     <StoreProvider>
-      <TestComponent payload={createPayload} method='create' />
-    </StoreProvider>
+      <TestComponent
+        modelClass={TestModel}
+        payload={createPayload}
+        method="create"
+      />
+    </StoreProvider>,
   );
 
   await waitFor(() => {
-    const allRecords = TestModel.all()
-    expect(allRecords.length).toBe(2)
-    expect(allRecords[0].id).toBe(1)
-    expect(allRecords[0].name).toBe('test1')
-    expect(allRecords[1].id).toBe(2)
-    expect(allRecords[1].name).toBe('test2')
-  })
-})
+    const allRecords = TestModel.all();
+    expect(allRecords.length).toBe(2);
+    expect(allRecords[0].id).toBe(1);
+    expect(allRecords[0].name).toBe('test1');
+    expect(allRecords[1].id).toBe(2);
+    expect(allRecords[1].name).toBe('test2');
+  });
+});
 
-// Alternative Approach
+test('Model should define and retrieve belongsTo relationship', async () => {
+  const userPayload = { data: { id: 1, name: 'John Doe' } };
+  const postPayload = { data: { id: 1, title: 'Hello World', userId: 1 } };
 
-// class TestModel extends Model {
-//   static entity = 'test';
+  const { rerender } = render(
+    <StoreProvider>
+      <TestComponent payload={userPayload} method="create" modelClass={User} />
+    </StoreProvider>,
+  );
 
-//   static fields() {
-//     return {
-//       id: Model.attr(null),
-//       name: Model.attr(''),
-//     };
-//   }
-// }
+  rerender(
+    <StoreProvider>
+      <TestComponent payload={postPayload} method="create" modelClass={Post} />
+    </StoreProvider>,
+  );
 
-// type Operation = {
-//   method: 'create' | 'insert' | 'update';
-//   payload: any;
-// };
+  await waitFor(() => {
+    const post = Post.all()[0];
 
-// const TestComponent = ({ operations }: { operations: Operation[] }) => {
-//   const state = useStoreState();
-//   const dispatch = useDispatch();
+    expect(post.user.id).toBe(1);
+    expect(post.user.name).toBe('John Doe');
+  });
+});
 
-//   useEffect(() => {
-//     // Initialize Model with the dispatch function and state
-//     TestModel.init(state, dispatch);
+test('Model should define and retrieve hasMany relationship', async () => {
+  const postPayload = { data: { id: 1, title: 'Hello World' } };
+  const commentPayload = {
+    data: [
+      { id: 1, content: 'Nice post!', postId: 1 },
+      { id: 2, content: 'Thanks for sharing.', postId: 1 },
+    ],
+  };
 
-//     const runOperations = async () => {
-//       for (const operation of operations) {
-//         await TestModel[operation.method](operation.payload);
-//       }
-//     };
-//     runOperations();
-//   }, [operations]); // Ensure this runs only once after mount
+  const { rerender } = render(
+    <StoreProvider>
+      <TestComponent payload={postPayload} method="create" modelClass={Post} />
+    </StoreProvider>,
+  );
 
-//   return (
-//     <div>
-//       <div data-testid="state">{JSON.stringify(state)}</div>
-//     </div>
-//   );
-// };
+  rerender(
+    <StoreProvider>
+      <TestComponent
+        payload={commentPayload}
+        method="create"
+        modelClass={Comment}
+      />
+    </StoreProvider>,
+  );
 
-// test('Model should be defined', () => {
-//   expect(Model).toBeDefined();
-// });
+  await waitFor(() => {
+    const post = Post.all()[0];
 
-// test('Model should create an instance with default values', () => {
-//   const instance = new TestModel();
-//   expect(instance.id).toBe(null);
-//   expect(instance.name).toBe('');
-// });
-
-// test('Model should create an instance with given values', () => {
-//   const instance = new TestModel({ id: 1, name: 'test' });
-//   expect(instance.id).toBe(1);
-//   expect(instance.name).toBe('test');
-// });
-
-// test('Model should dispatch create action with payload and update state', async () => {
-//   const payload = { data: { id: 1, name: 'test' } };
-
-//   const { getByTestId } = render(
-//     <StoreProvider>
-//       <TestComponent operations={[{ method: 'create', payload }]} />
-//     </StoreProvider>,
-//   );
-
-//   await waitFor(() => {
-//     const state = JSON.parse(getByTestId('state').textContent || '{}');
-//     const instance = state.test[0];
-//     expect(instance).toBeDefined();
-//     expect(instance.name).toBe('test');
-//   });
-// });
-
-// test('Model static store property should be updated', async () => {
-//   const payload = { data: { id: 2, name: 'test2' } };
-
-//   render(
-//     <StoreProvider>
-//       <TestComponent operations={[{ method: 'create', payload }]} />
-//     </StoreProvider>,
-//   );
-
-//   await waitFor(() => {
-//     // Log the store property for debugging
-//     console.log('Store:', TestModel.store);
-//     console.log('Model Store:', Model.store);
-
-//     // Verify the static store property is updated
-//     const state = Model.store; // Reference Model.store for consistency
-//     const instance = state.test.find((item: any) => item.id === 2);
-//     expect(instance).toBeDefined();
-//     expect(instance.name).toBe('test2');
-//   });
-// });
-
-// test('Model should insert records and update state', async () => {
-//   const payload = {
-//     data: [
-//       { id: 3, name: 'test3' },
-//       { id: 4, name: 'test4' },
-//     ],
-//   };
-
-//   const { getByTestId } = render(
-//     <StoreProvider>
-//       <TestComponent operations={[{ method: 'insert', payload }]} />
-//     </StoreProvider>,
-//   );
-
-//   await waitFor(() => {
-//     // Verify the static store property is updated
-//     const state = Model.store;
-//     console.log('Store:', state);
-//     expect(state.test.length).toBe(2);
-//     expect(state.test.find((item: any) => item.id === 3)).toBeDefined();
-//     expect(state.test.find((item: any) => item.id === 4)).toBeDefined();
-//   });
-// });
-
-// test('Model should create and insert records and update state', async () => {
-//   const createPayload = { data: { id: 1, name: 'test1' } };
-//   const insertPayload = {
-//     data: [
-//       { id: 2, name: 'test2' },
-//       { id: 3, name: 'test3' },
-//     ],
-//   };
-
-//   render(
-//     <StoreProvider>
-//       <TestComponent
-//         operations={[
-//           { method: 'create', payload: createPayload },
-//           { method: 'insert', payload: insertPayload },
-//         ]}
-//       />
-//     </StoreProvider>,
-//   );
-
-//   await waitFor(() => {
-//     // Verify the static store property is updated
-//     const state = Model.store;
-//     console.log('Store:', state);
-//     expect(state.test.length).toBe(3);
-//     expect(state.test.find((item: any) => item.id === 1)).toBeDefined();
-//     expect(state.test.find((item: any) => item.id === 2)).toBeDefined();
-//     expect(state.test.find((item: any) => item.id === 3)).toBeDefined();
-//   });
-// });
-
-// test('Model should update records and update state', async () => {
-//   const createPayload = { data: { id: 1, name: 'test1' } };
-//   const updatePayload = { data: { id: 1, name: 'updatedTest1' } };
-
-//   render(
-//     <StoreProvider>
-//       <TestComponent
-//         operations={[
-//           { method: 'create', payload: createPayload },
-//           { method: 'update', payload: updatePayload },
-//         ]}
-//       />
-//     </StoreProvider>,
-//   );
-
-//   await waitFor(() => {
-//     // Verify the static store property is updated
-//     const state = Model.store;
-//     console.log('Store:', state);
-//     const instance = state.test.find((item: any) => item.id === 1);
-//     expect(instance).toBeDefined();
-//     expect(instance.name).toBe('updatedTest1');
-//   });
-// });
+    expect(post.comments.length).toBe(2);
+    expect(post.comments[0].content).toBe('Nice post!');
+    expect(post.comments[1].content).toBe('Thanks for sharing.');
+  });
+});
