@@ -6,18 +6,24 @@ interface Attribute {
 }
 
 interface Fields {
-  [key: string]: Attribute;
+  [key: string]: Attribute | Relationship;
 }
 
 interface FieldCache {
   [key: string]: Fields;
 }
 
-interface Record {
+interface ModelRecord {
   [field: string]: any;
 }
 
 type Predicate<T> = (item: T) => boolean;
+
+interface Relationship {
+  type: string;
+  relatedModel: typeof Model;
+  foreignKey: string;
+}
 
 export class Model {
   [key: string]: any;
@@ -39,8 +45,9 @@ export class Model {
     this.store = state;
   }
 
-  constructor(record?: Record) {
+  constructor(record?: ModelRecord) {
     this.$fill(record);
+    this.$loadRelated();
   }
 
   static fields(): Fields {
@@ -76,14 +83,15 @@ export class Model {
     return this.$self().getFields();
   }
 
-  $fill(record: Record = {}): void {
+  $fill(record: ModelRecord = {}): void {
     const fields = this.$fields();
 
     for (const key in fields) {
       const field = fields[key];
-      const value = record[key];
-
-      this[key] = field.make(value);
+      if (isAttribute(field)) {
+        const value = record[key];
+        this[key] = field.make(value);
+      }
     }
 
     record.$id !== undefined && this.$setIndex(record.$id);
@@ -93,6 +101,43 @@ export class Model {
     this.$id = id;
 
     return this;
+  }
+
+  $loadRelated(): void {
+    const fields = this.$fields();
+
+    for (const key in fields) {
+      const field = fields[key];
+      if (isRelationship(field)) {
+        Object.defineProperty(this, key, {
+          get: () => {
+            if (field.type === 'belongsTo') {
+              const foreignKeyValue = this[field.foreignKey];
+              return field.relatedModel.find(foreignKeyValue);
+            } else if (field.type === 'hasMany') {
+              return field.relatedModel
+                .all()
+                .filter((item: Model) => item[field.foreignKey] == this.$id);
+            }
+            return null;
+          },
+          enumerable: true,
+        });
+      }
+    }
+  }
+
+  // To prevent circular references when handling serialization
+  toObject(): ModelRecord {
+    const record: ModelRecord = {};
+    const fields = this.$fields();
+
+    for (const key in fields) {
+      if (isAttribute(fields[key])) {
+        record[key] = this[key];
+      }
+    }
+    return record;
   }
 
   static create<T extends typeof Model>(this: T, payload: any): any {
@@ -134,6 +179,36 @@ export class Model {
   }
 
   static all<T extends typeof Model>(this: T): InstanceType<T>[] {
-    return Model.store[this.entity] || []
+    return Model.store[this.entity] || [];
   }
+
+  static belongsTo(
+    relatedModel: typeof Model,
+    foreignKey: string,
+  ): Relationship {
+    return { type: 'belongsTo', relatedModel, foreignKey };
+  }
+
+  static hasMany(relatedModel: typeof Model, foreignKey: string): Relationship {
+    return { type: 'hasMany', relatedModel, foreignKey };
+  }
+
+  static find<T extends typeof Model>(
+    this: T,
+    id: string | number,
+  ): InstanceType<T> | undefined {
+    return (
+      Model.store[this.entity]?.find((item: Model) => item.id == id) || null
+    );
+  }
+}
+
+function isAttribute(field: Attribute | Relationship): field is Attribute {
+  return (field as Attribute).make !== undefined;
+}
+
+function isRelationship(
+  field: Attribute | Relationship,
+): field is Relationship {
+  return (field as Relationship).type !== undefined;
 }
