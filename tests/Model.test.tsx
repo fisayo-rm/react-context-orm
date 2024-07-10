@@ -1,7 +1,7 @@
-import { render, waitFor, act } from '@testing-library/react';
+import { render, waitFor, act, getByTestId } from '@testing-library/react';
 import { Model } from '../src/Model';
 import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 class TestModel extends Model {
   static entity = 'test';
@@ -12,7 +12,16 @@ class TestModel extends Model {
     return {
       id: this.attr(null),
       name: this.attr(''),
+      value: this.attr(0),
     };
+  }
+
+  get computed() {
+    return this.value * 2;
+  }
+
+  set computed(val: number) {
+    this.value = val / 2;
   }
 }
 
@@ -53,6 +62,24 @@ class Comment extends Model {
       post: this.belongsTo(Post, 'postId'),
     };
   }
+}
+
+class Product extends Model {
+  static entity = 'products';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      price: this.attr(0),
+      quantity: this.attr(0),
+    };
+  }
+
+  get totalPrice() {
+    return this.price * this.quantity;
+  }
+
+  set totalPrice(val) {}
 }
 
 type methodType =
@@ -539,3 +566,79 @@ test('Model should define and retrieve hasMany relationship', async () => {
     expect(post.comments[1].content).toBe('Thanks for sharing.');
   });
 });
+
+test('Model should use custom getter to compute a value', async () => {
+  const payload = { data: { id: 1, value: 5 } };
+  render(
+    <StoreProvider>
+      <TestComponent payload={payload} method="create" modelClass={TestModel} />
+    </StoreProvider>,
+  );
+
+  await waitFor(() => {
+    const instance = TestModel.find(1);
+    expect(instance!.computed).toBe(10);
+  });
+});
+
+test('Model should use custom setter to compute a value', async () => {
+  const payload = { data: { id: 1 } };
+
+  render(
+    <StoreProvider>
+      <TestComponent payload={payload} method="create" modelClass={TestModel} />
+    </StoreProvider>,
+  );
+
+  await waitFor(() => {
+    const instance = TestModel.find(1);
+    expect(instance).toBeDefined();
+    instance!.computed = 20;
+    expect(instance!.value).toBe(10);
+  });
+});
+
+// test('Product should calculate totalPrice using getter', async () => {
+//   const payload = { data: { id: 1, price: 100, quantity: 2 } };
+
+//   const { getByTestId } = render(
+//     <StoreProvider>
+//       <TestComponent payload={payload} method="create" modelClass={Product} />
+//     </StoreProvider>,
+//   );
+
+//   await waitFor(() => {
+//     // const state = JSON.parse(getByTestId('state').textContent || '{}');
+//     const state = Model.store;
+//     const product = state.products[0];
+//     expect(product).toBeDefined();
+//     expect(product.price).toBe(100);
+//     expect(product.quantity).toBe(2);
+//     expect(product.totalPrice).toBe(200);
+//   });
+// });
+
+// test('Product should not update quantity using setter', async () => {
+//   const payload = { data: { id: 1, price: 50, quantity: 1 } };
+
+//   const {} = render(
+//     <StoreProvider>
+//       <TestComponent payload={payload} method="create" modelClass={Product} />
+//     </StoreProvider>,
+//   );
+
+//   await waitFor(() => {
+//     const state = Model.store;
+//     const product = state.products[0];
+//     expect(product).toBeDefined();
+//     expect(product.price).toBe(50);
+//     expect(product.quantity).toBe(1);
+//     expect(product.totalPrice).toBe(50);
+
+//     product.totalPrice = 200;
+//     // product.quantity = 3;
+//     console.log('PRODUCT', product);
+//     expect(product.totalPrice).not.toBe(200);
+//     // expect(product.quantity).not.toBe(3);
+//   });
+// });

@@ -48,6 +48,7 @@ export class Model {
   constructor(record?: ModelRecord) {
     this.$fill(record);
     this.$loadRelated();
+    // this.$defineGettersAndSetters();
   }
 
   static fields(): Fields {
@@ -139,6 +140,50 @@ export class Model {
     }
     return record;
   }
+
+  $defineGettersAndSetters(): void {
+    const prototype = Object.getPrototypeOf(this);
+
+    Object.getOwnPropertyNames(prototype).forEach((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
+      if (key !== 'constructor' && typeof descriptor?.get === 'function') {
+        Object.defineProperty(this, key, {
+          get: descriptor.get,
+          set: descriptor.get,
+          enumerable: true,
+        });
+      }
+    });
+  }
+
+  // $defineGettersAndSetters(): void {
+  //   const prototype = Object.getPrototypeOf(this);
+
+  //   [
+  //     ...Object.getOwnPropertyNames(prototype),
+  //     ...Object.getOwnPropertyNames(this),
+  //   ].forEach((key) => {
+  //     const descriptor =
+  //       Object.getOwnPropertyDescriptor(this, key) ||
+  //       Object.getOwnPropertyDescriptor(prototype, key);
+  //     console.log('descriptor', descriptor);
+  //     if (key !== 'constructor') {
+  //       if (descriptor && typeof descriptor.get === 'function') {
+  //         Object.defineProperty(this, key, {
+  //           get: descriptor.get,
+  //           set: () => {},
+  //           enumerable: true,
+  //         });
+  //       } else {
+  //         Object.defineProperty(this, key, {
+  //           get: () => this[key],
+  //           set: () => {},
+  //           enumerable: true,
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
 
   static create<T extends typeof Model>(this: T, payload: any): any {
     payload.model = this;
