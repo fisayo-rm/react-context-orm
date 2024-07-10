@@ -598,47 +598,34 @@ test('Model should use custom setter to compute a value', async () => {
   });
 });
 
-// test('Product should calculate totalPrice using getter', async () => {
-//   const payload = { data: { id: 1, price: 100, quantity: 2 } };
+test('Model should assign default value', async () => {
+  const payload = { data: { id: 1 } };
 
-//   const { getByTestId } = render(
-//     <StoreProvider>
-//       <TestComponent payload={payload} method="create" modelClass={Product} />
-//     </StoreProvider>,
-//   );
+  render(
+    <StoreProvider>
+      <TestComponent payload={payload} method="create" modelClass={TestModel} />
+    </StoreProvider>,
+  );
 
-//   await waitFor(() => {
-//     // const state = JSON.parse(getByTestId('state').textContent || '{}');
-//     const state = Model.store;
-//     const product = state.products[0];
-//     expect(product).toBeDefined();
-//     expect(product.price).toBe(100);
-//     expect(product.quantity).toBe(2);
-//     expect(product.totalPrice).toBe(200);
-//   });
-// });
+  await waitFor(() => {
+    const instance = TestModel.find(1) as TestModel;
+    expect(instance.name).toBe('');
+    expect(instance.value).toBe(0);
+  });
+});
 
-// test('Product should not update quantity using setter', async () => {
-//   const payload = { data: { id: 1, price: 50, quantity: 1 } };
+test('Model should override default values with provided values', async () => {
+  const payload = { data: { id: 1, name: 'test', value: 42 } };
 
-//   const {} = render(
-//     <StoreProvider>
-//       <TestComponent payload={payload} method="create" modelClass={Product} />
-//     </StoreProvider>,
-//   );
+  render(
+    <StoreProvider>
+      <TestComponent payload={payload} method="create" modelClass={TestModel} />
+    </StoreProvider>,
+  );
 
-//   await waitFor(() => {
-//     const state = Model.store;
-//     const product = state.products[0];
-//     expect(product).toBeDefined();
-//     expect(product.price).toBe(50);
-//     expect(product.quantity).toBe(1);
-//     expect(product.totalPrice).toBe(50);
-
-//     product.totalPrice = 200;
-//     // product.quantity = 3;
-//     console.log('PRODUCT', product);
-//     expect(product.totalPrice).not.toBe(200);
-//     // expect(product.quantity).not.toBe(3);
-//   });
-// });
+  await waitFor(() => {
+    const instance = TestModel.find(1) as TestModel;
+    expect(instance.name).toBe('test');
+    expect(instance.value).toBe(42);
+  });
+});
