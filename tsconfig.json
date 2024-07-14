@@ -8,8 +8,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-
     "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0"
     // "allowJs": false,
@@ -27,5 +25,6 @@
     // "importHelpers": false,
     // "isolatedModules": false
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

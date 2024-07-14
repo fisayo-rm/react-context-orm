@@ -3,6 +3,7 @@ node_modules/
 
 # Ignore build output
 build/
+dist/
 
 # Ignore development server files
 .DS_Store

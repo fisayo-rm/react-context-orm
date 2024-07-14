@@ -49,7 +49,7 @@ export class Model {
   ) {
     this.dispatch = dispatch;
     // TODO: this should probably be Model.store
-    this.store = state;
+    Model.store = state;
   }
 
   constructor(record?: ModelRecord) {
