@@ -43,6 +43,7 @@ export class Model {
     dispatch: (type: string, payload?: any) => Promise<any>,
   ) {
     this.dispatch = dispatch;
+    // TODO: this should probably be Model.store
     this.store = state;
   }
 
