@@ -1,4 +1,4 @@
-import { render, waitFor, act, getByTestId } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { Model } from '../src/Model';
 import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
 import { useEffect } from 'react';
@@ -62,24 +62,6 @@ class Comment extends Model {
       post: this.belongsTo(Post, 'postId'),
     };
   }
-}
-
-class Product extends Model {
-  static entity = 'products';
-
-  static fields() {
-    return {
-      id: this.attr(null),
-      price: this.attr(0),
-      quantity: this.attr(0),
-    };
-  }
-
-  get totalPrice() {
-    return this.price * this.quantity;
-  }
-
-  set totalPrice(val) {}
 }
 
 type methodType =

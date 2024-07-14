@@ -1,10 +1,4 @@
-import React, {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useReducer,
-} from 'react';
+import React, { ReactNode, createContext, useContext, useReducer } from 'react';
 import { Model } from './Model';
 interface Entity {
   id: number | string;

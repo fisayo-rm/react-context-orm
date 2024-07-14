@@ -18,6 +18,11 @@ interface ModelRecord {
   [field: string]: any;
 }
 
+// TODO: try to use this
+// interface State {
+//   [entity: string]: ModelRecord[];
+// }
+
 type Predicate<T> = (item: T) => boolean;
 
 interface Relationship {
@@ -43,6 +48,7 @@ export class Model {
     dispatch: (type: string, payload?: any) => Promise<any>,
   ) {
     this.dispatch = dispatch;
+    // TODO: this should probably be Model.store
     this.store = state;
   }
 
@@ -75,10 +81,6 @@ export class Model {
     this.cachedFields[this.entity] ??= this.fields();
 
     return this.cachedFields[this.entity];
-  }
-
-  static query<T extends typeof Model>(this: T): QueryBuilder<T> {
-    return new QueryBuilder(this);
   }
 
   $self(): typeof Model {
@@ -250,6 +252,10 @@ export class Model {
     return (
       Model.store[this.entity]?.find((item: Model) => item.id == id) || null
     );
+  }
+
+  static query<T extends typeof Model>(this: T): QueryBuilder<T> {
+    return new QueryBuilder(this);
   }
 }
 
