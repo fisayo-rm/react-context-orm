@@ -1,4 +1,5 @@
 import { State } from './ModelContext';
+import { QueryBuilder } from './QueryBuilder';
 
 interface Attribute {
   value: any;
@@ -76,6 +77,10 @@ export class Model {
     return this.cachedFields[this.entity];
   }
 
+  static query<T extends typeof Model>(this: T): QueryBuilder<T> {
+    return new QueryBuilder(this);
+  }
+
   $self(): typeof Model {
     return this.constructor as typeof Model;
   }
@@ -109,7 +114,7 @@ export class Model {
 
     for (const key in fields) {
       const field = fields[key];
-      if (isRelationship(field)) {
+      if (isRelationship(field) && !this.hasOwnProperty(key)) {
         Object.defineProperty(this, key, {
           get: () => {
             if (field.type === 'belongsTo') {
