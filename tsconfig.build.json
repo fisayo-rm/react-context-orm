@@ -5,8 +5,12 @@
     "emitDeclarationOnly": false,
     "outDir": "./dist",
     "rootDir": "./src",
-    "target": "ES6",
-    "module": "commonjs"
+    "importHelpers": true,
+    "target": "ES5"
+    // "module": "CommonJS"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
+  // "include": ["src/index.ts"]
+  // "files": ["./src/index.ts"],
+  // "include": []
 }
