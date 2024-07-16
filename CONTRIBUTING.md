@@ -7,7 +7,7 @@ We welcome contributions to the React ORM Library! By contributing, you help mak
 1. **Fork the repository**: Click on the "Fork" button at the top of the repository page to create a copy of the repository in your own GitHub account.
 2. **Clone the repository**: Clone your forked repository to your local machine.
    ```sh
-   git clone https://github.com/your-username/react-orm-library.git
+   git clone https://github.com/your-username/react-context-orm.git
    ```
 3. **Create a new branch**: Create a new branch for your changes.
    ```sh

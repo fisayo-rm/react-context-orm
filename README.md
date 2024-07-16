@@ -9,7 +9,7 @@ React ORM Library is a powerful and flexible ORM (Object-Relational Mapping) lib
 To install the library, run:
 
 ```bash
-npm install react-orm-library
+npm install react-context-orm
 
 ```
 
@@ -24,7 +24,7 @@ import {
   StoreProvider,
   useStoreState,
   useDispatch,
-} from 'react-orm-library';
+} from 'react-context-orm';
 
 class User extends Model {
   static entity = 'users';
