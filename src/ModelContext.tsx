@@ -121,6 +121,11 @@ const mutations: Record<string, Mutation> = {
     const { entity } = payload;
     state[entity] = [];
   },
+  reset: (state) => {
+    for (const entity in state) {
+      delete state[entity];
+    }
+  },
 };
 
 const actions: Record<string, ActionCreator> = {
@@ -171,6 +176,9 @@ const actions: Record<string, ActionCreator> = {
   deleteAll: async ({ commit }, payload) => {
     const { model } = payload;
     commit('deleteAll', { entity: model.entity });
+  },
+  reset: ({ commit }) => {
+    commit('reset');
   },
 };
 

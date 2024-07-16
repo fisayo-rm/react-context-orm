@@ -202,6 +202,7 @@ export class Model {
     return this.dispatch('insert', payload);
   }
 
+  // updates only one item
   static update<T extends typeof Model>(this: T, payload: any): any {
     payload.model = this;
     return this.dispatch('update', payload);
@@ -232,6 +233,10 @@ export class Model {
 
   static all<T extends typeof Model>(this: T): InstanceType<T>[] {
     return Model.store[this.entity] || [];
+  }
+
+  static async reset(): Promise<any> {
+    return this.dispatch('reset');
   }
 
   static belongsTo(
