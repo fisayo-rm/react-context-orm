@@ -135,8 +135,8 @@ Use `belongsTo` and `hasMany` methods to define relationships in your model fiel
 
 ### How do I perform bulk operations?
 
-Use the `create`, `insert`, `update`, and `delete` methods with an array of data.
+Use the `create`, `insert`, `insertOrUpdate`, and `delete` methods with an array of data.
 
 ## License
 
-[MIT License](https://www.notion.so/LICENSE)
+[MIT License](./LICENSE)
