@@ -1,8 +1,8 @@
-# React ORM Library
+# React Context ORM
 
 ## Introduction
 
-React ORM Library is a powerful and flexible ORM (Object-Relational Mapping) library for React applications, enabling easy and efficient data management using models.
+React Context ORM is a flexible lightweight ORM (Object-Relational Mapping) library for React applications, enabling easy and efficient data management using models.
 
 ## Installation
 

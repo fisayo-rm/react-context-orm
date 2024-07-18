@@ -1,6 +1,6 @@
-import { Model } from './Model';
-import { State, Action } from './interfaces';
-import { mutations } from './mutations';
+import { Model } from '../Model';
+import { State, Action } from '../interfaces';
+import { mutations } from '../mutations';
 
 /**
  * Reducer function to handle state updates.

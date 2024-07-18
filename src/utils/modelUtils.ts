@@ -1,5 +1,5 @@
-import { Model } from './Model';
-import { Attribute, Relationship, Entity, NormalizedData } from './interfaces';
+import { Model } from '../Model';
+import { Attribute, Relationship, Entity, NormalizedData } from '../interfaces';
 
 /**
  * Normalizes the given data.

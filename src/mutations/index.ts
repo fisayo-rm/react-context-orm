@@ -1,5 +1,5 @@
-import { Mutation } from './interfaces';
-import { Model } from './Model';
+import { Mutation } from '../interfaces';
+import { Model } from '../Model';
 
 export const mutations: Record<string, Mutation> = {
   create: (state, payload) => {
