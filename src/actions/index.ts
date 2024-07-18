@@ -1,6 +1,6 @@
-import { Model } from './Model';
-import { ActionCreator } from './interfaces';
-import { normalizeData, createRecords } from './utils';
+import { Model } from '../Model';
+import { ActionCreator } from '../interfaces';
+import { normalizeData, createRecords } from '../utils';
 
 export const actions: Record<string, ActionCreator> = {
   create: async ({ commit }, payload) => {

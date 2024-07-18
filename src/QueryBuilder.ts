@@ -1,5 +1,5 @@
 import { Model } from './Model';
-import { QueryBuilderOptions } from './queryBuilderInterfaces';
+import { QueryBuilderOptions } from './interfaces';
 
 /**
  * Class representing a query builder for models.

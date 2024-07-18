@@ -1,4 +1,4 @@
-import { Model } from './Model';
+import { Model } from '../Model';
 
 /**
  * Interface representing an entity with an ID.

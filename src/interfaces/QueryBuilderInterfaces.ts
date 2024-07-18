@@ -1,4 +1,4 @@
-import { QueryBuilder } from './QueryBuilder';
+import { QueryBuilder } from '../QueryBuilder';
 
 /**
  * Interface representing the options for a query builder.

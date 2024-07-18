@@ -1,6 +1,6 @@
-# Contributing to React ORM Library
+# Contributing to React Context ORM
 
-We welcome contributions to the React ORM Library! By contributing, you help make this library better for everyone. Here are some guidelines to follow when contributing:
+We welcome contributions to React Context ORM! By contributing, you help make this library better for everyone. Here are some guidelines to follow when contributing:
 
 ## Getting Started
 
@@ -57,8 +57,8 @@ If you encounter any issues, please report them using the GitHub issue tracker. 
 - Please ensure that your contributions do not break existing tests.
 - Contributions that include tests and documentation updates are highly appreciated.
 
-Thank you for contributing to React ORM Library!
+Thank you for contributing to React Context ORM!
 
 ## License
 
-By contributing to React ORM Library, you agree that your contributions will be licensed under the MIT License.
+By contributing to React Context ORM, you agree that your contributions will be licensed under the MIT License.
