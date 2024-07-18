@@ -198,13 +198,14 @@ export const StoreProvider: React.FC<{
   };
 
   const [state, reactDispatch] = useReducer(reducer, initialState);
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
 
-  const dispatch = async (type: string, payload?: any) => {
+  const dispatch = React.useCallback(async (type: string, payload?: any) => {
     const action = actions[type];
     if (action) {
       const context: ActionContext = {
-        state: Model.store,
-        // state,
+        state: stateRef.current,
         commit: (mutationType: string, mutationPayload?: any) => {
           reactDispatch({
             type: mutationType,
@@ -217,7 +218,7 @@ export const StoreProvider: React.FC<{
       return action(context, payload);
     }
     throw new Error(`Unknown action type: ${type}`);
-  };
+  }, []);
 
   return (
     <StoreStateContext.Provider value={state}>
