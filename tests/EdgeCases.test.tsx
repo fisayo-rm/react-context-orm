@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import { StoreProvider, useStoreState, useDispatch } from '../src/ModelContext';
+import { StoreProvider } from '../src/ModelContext';
+import { useStoreState, useDispatch } from '../src/context';
 import { Model } from '../src/Model';
 import { User, Post, Comment } from './Models';
 

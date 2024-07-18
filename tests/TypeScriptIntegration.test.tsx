@@ -1,7 +1,8 @@
 import { render, waitFor } from '@testing-library/react';
 import { Model } from '../src/Model';
-import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
+import { StoreProvider } from '../src/ModelContext';
 import React, { useEffect } from 'react';
+import { useStoreState, useDispatch } from '../src/context';
 
 class TestModel extends Model {
   static entity = 'test';

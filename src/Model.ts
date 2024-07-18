@@ -1,4 +1,4 @@
-import { State } from './ModelContext';
+import { State } from './interfaces';
 import { QueryBuilder } from './QueryBuilder';
 import {
   FieldCache,

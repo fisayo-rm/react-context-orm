@@ -1,4 +1,5 @@
-export { StoreProvider, useStoreState, useDispatch } from './ModelContext';
+export { StoreProvider } from './ModelContext';
+export { useStoreState, useDispatch } from './context';
 export { Model } from './Model';
 
 // export * from './Model';

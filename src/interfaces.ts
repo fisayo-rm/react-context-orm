@@ -1,5 +1,52 @@
-import { State } from './ModelContext';
 import { Model } from './Model';
+
+/**
+ * Interface representing an entity with an ID.
+ */
+export interface Entity {
+  id: number | string;
+  [field: string]: any;
+}
+
+/**
+ * Interface representing normalized data.
+ */
+export interface NormalizedData {
+  [key: string]: { [key: string]: Entity & { $id: string } };
+}
+
+/**
+ * Interface representing the state of the store.
+ */
+export type State = Record<string, any>;
+
+/**
+ * Interface representing an action.
+ */
+export type Action = { type: string; payload?: any };
+
+/**
+ * Interface representing the context for actions.
+ */
+export type ActionContext = {
+  state: State;
+  commit: (type: string, payload?: any) => void;
+  dispatch: (type: string, payload?: any) => Promise<any>;
+};
+
+/**
+ * Interface representing an action creator.
+ */
+export type ActionCreator = (
+  context: ActionContext,
+  payload?: any,
+) => Promise<any> | void;
+
+/**
+ * Interface representing a mutation.
+ */
+export type Mutation = (state: State, payload?: any) => void;
+
 /**
  * Interface representing an attribute of a model.
  */

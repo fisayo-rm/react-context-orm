@@ -1,6 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 import { Model } from '../src/Model';
-import { useDispatch, useStoreState, StoreProvider } from '../src/ModelContext';
+import { StoreProvider } from '../src/ModelContext';
+import { useStoreState, useDispatch } from '../src/context';
 import { useEffect } from 'react';
 
 class Client extends Model {
