@@ -362,7 +362,7 @@ test('Model should delete multiple records by ids and update state', async () =>
   };
   const deletePayload = [1, 2];
 
-  render(
+  const { getByTestId } = render(
     <StoreProvider>
       <TestComponent
         modelClass={TestModel}
@@ -372,6 +372,11 @@ test('Model should delete multiple records by ids and update state', async () =>
       {/* <TestComponent modelClass={TestModel} payload={deletePayload} method="delete" /> */}
     </StoreProvider>,
   );
+
+  await waitFor(() => {
+    const state = JSON.parse(getByTestId('state').textContent || '{}');
+    expect(state.test.length).toBe(2);
+  });
 
   await act(async () => {
     const deletedItems = await TestModel.delete(deletePayload);
