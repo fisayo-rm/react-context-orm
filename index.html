@@ -1,0 +1,96 @@
+<!DOCTYPE html><html class="default" lang="en"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>react-context-orm - v1.0.0</title><meta name="description" content="Documentation for react-context-orm"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">react-context-orm - v1.0.0</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h2>react-context-orm - v1.0.0</h2></div><div class="tsd-panel tsd-typography"><a id="md:react-context-orm" class="tsd-anchor"></a><h1 class="tsd-anchor-link">React Context ORM<a href="#md:react-context-orm" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1><a id="md:introduction" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Introduction<a href="#md:introduction" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>React Context ORM is a flexible lightweight ORM (Object-Relational Mapping) library for React applications, enabling easy and efficient data management using models.</p>
+<a id="md:installation" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Installation<a href="#md:installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>To install the library, run:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">install</span><span class="hl-1"> </span><span class="hl-2">react-context-orm</span><br/>
+</code><button type="button">Copy</button></pre>
+
+<a id="md:quick-start" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Quick Start<a href="#md:quick-start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Here's a simple example to get you started:</p>
+<pre><code class="jsx">import React from 'react';
+import {
+  Model,
+  StoreProvider,
+  useStoreState,
+  useDispatch,
+} from 'react-context-orm';
+
+class User extends Model {
+  static entity = 'users';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      name: this.attr(''),
+    };
+  }
+}
+
+const App = () => {
+  const state = useStoreState();
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    User.init(state, dispatch);
+    User.create({ data: { id: 1, name: 'John Doe' } });
+  }, [state, dispatch]);
+
+  return (
+    <StoreProvider>
+      <div>{JSON.stringify(state.users)}</div>
+    </StoreProvider>
+  );
+};
+
+export default App;
+</code><button type="button">Copy</button></pre>
+
+<a id="md:usage" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Usage<a href="#md:usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><a id="md:models" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Models<a href="#md:models" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Define your models by extending the <code>Model</code> class:</p>
+<pre><code class="jsx">class Post extends Model {
+  static entity = 'posts';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      title: this.attr(''),
+      content: this.attr(''),
+      userId: this.attr(null),
+      user: this.belongsTo(User, 'userId'),
+    };
+  }
+}
+</code><button type="button">Copy</button></pre>
+
+<a id="md:crud-operations" class="tsd-anchor"></a><h3 class="tsd-anchor-link">CRUD Operations<a href="#md:crud-operations" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Perform CRUD operations using the static methods:</p>
+<pre><code class="jsx">await User.create({ data: { id: 1, name: 'John Doe' } });
+const user = User.find(1);
+await User.update({ data: { id: 1, name: 'Jane Doe' } });
+await User.delete(1);
+</code><button type="button">Copy</button></pre>
+
+<a id="md:relationships" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Relationships<a href="#md:relationships" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Define and query relationships:</p>
+<pre><code class="jsx">class Comment extends Model {
+  static entity = 'comments';
+
+  static fields() {
+    return {
+      id: this.attr(null),
+      content: this.attr(''),
+      postId: this.attr(null),
+      post: this.belongsTo(Post, 'postId'),
+    };
+  }
+}
+
+const post = Post.query().with('comments').find(1);
+</code><button type="button">Copy</button></pre>
+
+<a id="md:advanced-topics" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Advanced Topics<a href="#md:advanced-topics" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><a id="md:query-builder" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Query Builder<a href="#md:query-builder" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Use the query builder for complex queries:</p>
+<pre><code class="jsx">const posts = Post.query()
+  .with(['user', 'comments'])
+  .orderBy('title', 'asc')
+  .all();
+</code><button type="button">Copy</button></pre>
+
+<a id="md:contributing" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Contributing<a href="#md:contributing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>We welcome contributions! Please read our <a href="media/CONTRIBUTING.md">contributing guidelines</a> for more information.</p>
+<a id="md:faq" class="tsd-anchor"></a><h2 class="tsd-anchor-link">FAQ<a href="#md:faq" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><a id="md:how-do-i-define-relationships-between-models" class="tsd-anchor"></a><h3 class="tsd-anchor-link">How do I define relationships between models?<a href="#md:how-do-i-define-relationships-between-models" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Use <code>belongsTo</code> and <code>hasMany</code> methods to define relationships in your model fields.</p>
+<a id="md:how-do-i-perform-bulk-operations" class="tsd-anchor"></a><h3 class="tsd-anchor-link">How do I perform bulk operations?<a href="#md:how-do-i-perform-bulk-operations" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Use the <code>create</code>, <code>insert</code>, <code>insertOrUpdate</code>, and <code>delete</code> methods with an array of data.</p>
+<a id="md:license" class="tsd-anchor"></a><h2 class="tsd-anchor-link">License<a href="#md:license" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p><a href="./LICENSE">MIT License</a></p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#md:react-context-orm"><span>React <wbr/>Context ORM</span></a><ul><li><a href="#md:introduction"><span>Introduction</span></a></li><li><a href="#md:installation"><span>Installation</span></a></li><li><a href="#md:quick-start"><span>Quick <wbr/>Start</span></a></li><li><a href="#md:usage"><span>Usage</span></a></li><li><ul><li><a href="#md:models"><span>Models</span></a></li><li><a href="#md:crud-operations"><span>CRUD <wbr/>Operations</span></a></li><li><a href="#md:relationships"><span>Relationships</span></a></li><li><a href="#md:advanced-topics"><span>Advanced <wbr/>Topics</span></a></li><li><a href="#md:query-builder"><span>Query <wbr/>Builder</span></a></li></ul></li><li><a href="#md:contributing"><span>Contributing</span></a></li><li><a href="#md:faq"><span>FAQ</span></a></li><li><ul><li><a href="#md:how-do-i-define-relationships-between-models"><span>How do <wbr/>I define relationships between models?</span></a></li><li><a href="#md:how-do-i-perform-bulk-operations"><span>How do <wbr/>I perform bulk operations?</span></a></li></ul></li><li><a href="#md:license"><span>License</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="assets/icons.svg#icon-1"></use></svg><span>react-context-orm - v1.0.0</span></a><ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="."><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
