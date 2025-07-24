@@ -123,6 +123,10 @@ const posts = Post.query()
   .all();
 ```
 
+## Documentation
+
+Full API documentation is available [here](https://fisayo-rm.github.io/react-context-orm/).
+
 ## Contributing
 
 We welcome contributions! Please read our [contributing guidelines](CONTRIBUTING.md) for more information.
