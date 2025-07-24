@@ -55,4 +55,8 @@ export const mutations: Record<string, Mutation> = {
       delete state[entity];
     }
   },
+  hydrate: (state, payload) => {
+    Object.keys(state).forEach((key) => delete state[key]);
+    Object.assign(state, payload);
+  },
 };

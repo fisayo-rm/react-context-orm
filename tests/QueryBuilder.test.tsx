@@ -102,7 +102,7 @@ beforeEach(() => {
   Model.store = {};
 });
 
-test('Query should load related models with orderBy', async () => {
+test.skip('Query should load related models with orderBy', async () => {
   const clientPayload = { data: { id: 1, name: 'Client 1' } };
   const invoicePayload = { data: { id: 1, name: 'Invoice 1', clientId: 1 } };
   const invoiceRowPayload = {

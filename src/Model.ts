@@ -46,12 +46,17 @@ export class Model {
    * @param state The state of the store.
    * @param dispatch The dispatch function.
    */
-  static init(
+  static async init(
     state: State,
     dispatch: (type: string, payload?: any) => Promise<any>,
   ) {
     this.dispatch = dispatch;
-    Model.store = state;
+
+    if (state && JSON.stringify(state) !== JSON.stringify(Model.store)) {
+      await dispatch('hydrate', state);
+    } else {
+      Model.store = state;
+    }
   }
 
   /**
@@ -364,5 +369,14 @@ export class Model {
    */
   static query<T extends typeof Model>(this: T): QueryBuilder<T> {
     return new QueryBuilder(this);
+  }
+
+  /**
+   * Hydrates the store with the given state
+   * @param state The external data to hydrate with
+   * @returns A promise that resolves when hydration is complete
+   */
+  static async hydrate(state: State): Promise<void> {
+    await this.dispatch('hydrate', state);
   }
 }

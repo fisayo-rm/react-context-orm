@@ -54,4 +54,7 @@ export const actions: Record<string, ActionCreator> = {
   reset: ({ commit }) => {
     commit('reset');
   },
+  hydrate: async ({ commit }, payload) => {
+    commit('hydrate', payload);
+  },
 };

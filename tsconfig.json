@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "suppressImplicitAnyIndexErrors": true,
+    // "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0"
     // "allowJs": false,
     // "checkJs": false,
